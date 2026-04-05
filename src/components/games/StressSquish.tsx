@@ -43,9 +43,25 @@ const StressSquish = () => {
       y: 5 + Math.random() * 80,
       size: Math.max(28, 50 - elapsed.current * 0.3),
       color: colors[Math.floor(Math.random() * colors.length)],
+      spawnedAt: Date.now(),
     };
     setTargets((prev) => [...prev.slice(-14), b]);
   }, []);
+
+  // Auto-remove targets after a timeout (shorter as game progresses)
+  useEffect(() => {
+    if (!running || targets.length === 0) return;
+    const lifetime = Math.max(1500, 3000 - elapsed.current * 25);
+    const interval = setInterval(() => {
+      const now = Date.now();
+      setTargets((prev) => {
+        const expired = prev.filter((t) => now - t.spawnedAt >= lifetime);
+        if (expired.length > 0) setMisses((m) => m + expired.length);
+        return prev.filter((t) => now - t.spawnedAt < lifetime);
+      });
+    }, 200);
+    return () => clearInterval(interval);
+  }, [running, targets.length]);
 
   useEffect(() => {
     if (!running) return;
