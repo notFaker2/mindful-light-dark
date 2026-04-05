@@ -1,8 +1,14 @@
 import { Link } from "react-router-dom";
 import { Wind, Heart, Sparkles, Gamepad2, BarChart3, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
+import { useAuth } from "@/hooks/useAuth";
 const Index = () => {
+
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  // Find your "Play Game" button and change its onClick to:
+  const handlePlayGame = () => user ? navigate("/games") : navigate("/auth");
   return (
     <div className="flex flex-col items-center px-4 py-16 max-w-4xl mx-auto">
       <h1 className="text-4xl sm:text-5xl font-bold text-center mb-4">
@@ -27,7 +33,8 @@ const Index = () => {
           </Button>
         </Link>
         <Link to="/games">
-          <Button variant="outline" className="px-6 h-11 rounded-full gap-2">
+          <Button variant="outline" className="px-6 h-11 rounded-full gap-2"
+          onClick={handlePlayGame}>
             <Gamepad2 className="h-4 w-4" /> Play Mood Games
           </Button>
         </Link>
