@@ -114,7 +114,7 @@ const Auth = () => {
             </div>
 
             {error && (
-              <p className="text-sm text-destructive bg-destructive/10 rounded-lg p-3">{error}</p>
+              <p className="text-destructive bg-white rounded-lg p-3">{error}</p>
             )}
             {message && (
               <p className="text-sm text-primary bg-primary/10 rounded-lg p-3">{message}</p>

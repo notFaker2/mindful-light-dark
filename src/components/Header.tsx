@@ -8,13 +8,17 @@ const Header = () => {
   const { pathname } = useLocation();
   const { user, signOut } = useAuth();
 
-  const links = [
-    { to: "/", label: "Home", icon: Home },
-    { to: "/breathing", label: "Breathe", icon: Wind },
-    { to: "/games", label: "Games", icon: Gamepad2 },
-    { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { to: "/report", label: "Report", icon: FileText },
+  // Define all possible links
+  const allLinks = [
+    { to: "/", label: "Home", icon: Home, requiresAuth: false },
+    { to: "/breathing", label: "Breathe", icon: Wind, requiresAuth: false },
+    { to: "/games", label: "Games", icon: Gamepad2, requiresAuth: true },
+    { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, requiresAuth: true },
+    { to: "/report", label: "Report", icon: FileText, requiresAuth: true },
   ];
+
+  // Filter links based on authentication
+  const links = allLinks.filter(link => !link.requiresAuth || user);
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-card/70 border-b border-border">
