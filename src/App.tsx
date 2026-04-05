@@ -7,7 +7,20 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import Header from "@/components/Header";
 import Index from "./pages/Index.tsx";
 import Breathing from "./pages/Breathing.tsx";
+import Games from "./pages/Games.tsx";
+import Dashboard from "./pages/Dashboard.tsx";
+import Report from "./pages/Report.tsx";
 import NotFound from "./pages/NotFound.tsx";
+
+import MoodColors from "@/components/games/MoodColors";
+import StressSquish from "@/components/games/StressSquish";
+import MemoryMatch from "@/components/games/MemoryMatch";
+import MoodCheckIn from "@/components/games/MoodCheckIn";
+import CalmMaze from "@/components/games/CalmMaze";
+import BreathRhythm from "@/components/games/BreathRhythm";
+import FocusDot from "@/components/games/FocusDot";
+import CopingPuzzle from "@/components/games/CopingPuzzle";
+import BreathCount from "@/components/games/BreathCount";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +35,18 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/breathing" element={<Breathing />} />
+            <Route path="/games" element={<Games />} />
+            <Route path="/games/mood-colors" element={<MoodColors />} />
+            <Route path="/games/stress-squish" element={<StressSquish />} />
+            <Route path="/games/memory-match" element={<MemoryMatch />} />
+            <Route path="/games/mood-checkin" element={<MoodCheckIn />} />
+            <Route path="/games/calm-maze" element={<CalmMaze />} />
+            <Route path="/games/breath-rhythm" element={<BreathRhythm />} />
+            <Route path="/games/focus-dot" element={<FocusDot />} />
+            <Route path="/games/coping-puzzle" element={<CopingPuzzle />} />
+            <Route path="/games/breath-count" element={<BreathCount />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/report" element={<Report />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
