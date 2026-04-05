@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { Play, Pause, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { addSession } from "@/lib/wellnessStore";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 type BreathingMode = "calm" | "focus" | "relax" | "sleep";
 
@@ -23,6 +26,7 @@ const modes: Record<BreathingMode, ModeConfig> = {
 const phases = ["Breathe In", "Hold", "Breathe Out", "Hold"];
 
 const BreathingExercise = () => {
+  const { user } = useAuth();
   const [mode, setMode] = useState<BreathingMode>("calm");
   const [isRunning, setIsRunning] = useState(false);
   const [phaseIndex, setPhaseIndex] = useState(0);
@@ -30,6 +34,7 @@ const BreathingExercise = () => {
   const [cycles, setCycles] = useState(0);
   const [totalSeconds, setTotalSeconds] = useState(0);
   const [circleScale, setCircleScale] = useState(0.6);
+  const [sessionSaved, setSessionSaved] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const durationRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -40,11 +45,69 @@ const BreathingExercise = () => {
     if (durationRef.current) clearInterval(durationRef.current);
   }, []);
 
-  const reset = useCallback(() => {
-    // Save session if we had cycles
-    if (cycles > 0 && totalSeconds > 0) {
-      addSession({ type: "breathing", name: config.label, duration: totalSeconds, score: cycles, mood: 4 });
+  // Save to Supabase (only if user is logged in)
+  const saveToSupabase = async (duration: number, cycleCount: number, modeName: string) => {
+    if (!user) {
+      console.log("User not logged in, skipping Supabase save");
+      return;
     }
+
+    try {
+      // Calculate mood based on cycles completed
+      const mood = cycleCount > 10 ? 5 : cycleCount > 5 ? 4 : cycleCount > 2 ? 3 : 4;
+      
+      // Prepare details as JSONB
+      const details = {
+        cycles: cycleCount,
+        pattern: config.patternLabel,
+        pattern_details: config.pattern
+      };
+
+      const { error } = await supabase
+        .from('wellness_sessions')
+        .insert([
+          {
+            user_id: user.id,
+            type: 'breathing',
+            name: modeName,
+            duration: duration,
+            score: cycleCount,
+            mood: mood,
+            details: details,
+            date: new Date().toISOString()
+          }
+        ]);
+
+      if (error) throw error;
+      console.log('✅ Breathing session saved to Supabase');
+    } catch (error) {
+      console.error('❌ Failed to save to Supabase:', error);
+    }
+  };
+
+  const reset = useCallback(async () => {
+    // Save session if we had cycles
+    if (cycles > 0 && totalSeconds > 0 && !sessionSaved) {
+      const moodValue = cycles > 10 ? 5 : cycles > 5 ? 4 : cycles > 2 ? 3 : 4;
+      
+      // Always save to local storage (works for both logged in and guest users)
+      addSession({ 
+        type: "breathing", 
+        name: config.label, 
+        duration: totalSeconds, 
+        score: cycles, 
+        mood: moodValue 
+      });
+      
+      // Save to Supabase only if user is logged in
+      if (user) {
+        await saveToSupabase(totalSeconds, cycles, config.label);
+      } else {
+        console.log("Guest user: Session saved only locally");
+      }
+      setSessionSaved(true);
+    }
+    
     stopTimers();
     setIsRunning(false);
     setPhaseIndex(0);
@@ -52,7 +115,12 @@ const BreathingExercise = () => {
     setCycles(0);
     setTotalSeconds(0);
     setCircleScale(0.6);
-  }, [stopTimers, cycles, totalSeconds, config.label]);
+  }, [stopTimers, cycles, totalSeconds, config.label, sessionSaved, user]);
+
+  // Reset sessionSaved when mode changes or new session starts
+  useEffect(() => {
+    setSessionSaved(false);
+  }, [mode]);
 
   useEffect(() => {
     if (!isRunning) return;
@@ -106,6 +174,18 @@ const BreathingExercise = () => {
         Breathing <span className="text-primary">Exercise</span>
       </h1>
       <p className="text-muted-foreground mb-8">Choose a mode and follow the rhythm</p>
+
+      {/* Show guest mode indicator */}
+      {!user && (
+        <div className="mb-4 p-3 bg-primary/10 rounded-lg border border-primary/20 text-center max-w-md">
+          <p className="text-sm text-primary font-medium">
+            🧘 You're in guest mode. Your sessions will be saved locally.
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            <Link to="/auth" className="text-primary hover:underline">Login</Link> to save your progress to the cloud
+          </p>
+        </div>
+      )}
 
       {/* Mode Selector */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full mb-10">
