@@ -10,6 +10,7 @@ interface Target {
   y: number;
   size: number;
   color: string;
+  spawnedAt: number;
 }
 
 const colors = [
