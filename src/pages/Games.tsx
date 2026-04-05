@@ -3,7 +3,7 @@ import { Palette, Target, Grid3X3, SlidersHorizontal, Map, Wind, Eye, Lightbulb,
 
 const games = [
   { id: "mood-colors", title: "Mood Colors", desc: "Pick colors that match your mood", icon: Palette, color: "hsl(var(--calm))" },
-  { id: "stress-squish", title: "Stress Squish", desc: "Pop bubbles to release stress", icon: Target, color: "hsl(var(--focus))" },
+  { id: "stress-squish", title: "Aim Trainer", desc: "Hit targets with increasing intensity", icon: Target, color: "hsl(var(--focus))" },
   { id: "memory-match", title: "Memory Match", desc: "Test your focus with card matching", icon: Grid3X3, color: "hsl(var(--relax))" },
   { id: "mood-checkin", title: "Mood Check-In", desc: "Rate your current mental state", icon: SlidersHorizontal, color: "hsl(var(--primary))" },
   { id: "calm-maze", title: "Calm Maze", desc: "Explore a maze and unlock coping tips", icon: Map, color: "hsl(var(--sleep))" },
