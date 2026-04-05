@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Play, Pause, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { addSession } from "@/lib/wellnessStore";
 
 type BreathingMode = "calm" | "focus" | "relax" | "sleep";
 
