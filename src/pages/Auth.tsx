@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,11 +18,22 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
 
+  // Get the intended destination from location state or localStorage
+  const from = (location.state as any)?.from?.pathname || 
+               localStorage.getItem("redirectAfterLogin") || 
+               "/";
+
   useEffect(() => {
-    if (user) navigate("/");
-  }, [user, navigate]);
+    if (user) {
+      // Clear the stored redirect
+      localStorage.removeItem("redirectAfterLogin");
+      // Navigate to the intended destination or home
+      navigate(from);
+    }
+  }, [user, navigate, from]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +45,7 @@ const Auth = () => {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate("/");
+        // User will be redirected by the useEffect above
       } else {
         const { error } = await supabase.auth.signUp({
           email,
@@ -73,6 +84,15 @@ const Auth = () => {
           <p className="text-center text-muted-foreground mb-6 text-sm">
             {isLogin ? "Sign in to track your wellness journey" : "Start your wellness journey today"}
           </p>
+
+          {/* Show message if coming from games page */}
+          {from === "/games" && !user && (
+            <div className="mb-4 p-3 bg-primary/10 rounded-lg border border-primary/20 text-center">
+              <p className="text-sm text-primary font-medium">
+                🎮 Please login to play games and track your progress!
+              </p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
@@ -114,7 +134,7 @@ const Auth = () => {
             </div>
 
             {error && (
-              <p className="text-destructive bg-white rounded-lg p-3">{error}</p>
+              <p className="text-sm text-destructive bg-destructive/10 rounded-lg p-3">{error}</p>
             )}
             {message && (
               <p className="text-sm text-primary bg-primary/10 rounded-lg p-3">{message}</p>
