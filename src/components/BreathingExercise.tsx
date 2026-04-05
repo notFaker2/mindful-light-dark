@@ -41,6 +41,10 @@ const BreathingExercise = () => {
   }, []);
 
   const reset = useCallback(() => {
+    // Save session if we had cycles
+    if (cycles > 0 && totalSeconds > 0) {
+      addSession({ type: "breathing", name: config.label, duration: totalSeconds, score: cycles, mood: 4 });
+    }
     stopTimers();
     setIsRunning(false);
     setPhaseIndex(0);
@@ -48,7 +52,7 @@ const BreathingExercise = () => {
     setCycles(0);
     setTotalSeconds(0);
     setCircleScale(0.6);
-  }, [stopTimers]);
+  }, [stopTimers, cycles, totalSeconds, config.label]);
 
   useEffect(() => {
     if (!isRunning) return;
