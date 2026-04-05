@@ -1,9 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { Wind, Home, Gamepad2, LayoutDashboard, FileText } from "lucide-react";
+import { Wind, Home, Gamepad2, LayoutDashboard, FileText, LogIn, LogOut, User } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 
 const Header = () => {
   const { pathname } = useLocation();
+  const { user, signOut } = useAuth();
 
   const links = [
     { to: "/", label: "Home", icon: Home },
@@ -38,6 +41,25 @@ const Header = () => {
           <div className="ml-1.5">
             <ThemeToggle />
           </div>
+          {user ? (
+            <div className="flex items-center gap-1.5 ml-1.5">
+              <span className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground px-2 py-1 rounded-lg bg-muted">
+                <User className="h-3 w-3" />
+                {user.user_metadata?.display_name || user.email?.split("@")[0]}
+              </span>
+              <Button variant="ghost" size="sm" onClick={signOut} className="h-8 px-2 text-xs">
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline ml-1">Logout</span>
+              </Button>
+            </div>
+          ) : (
+            <Link to="/auth" className="ml-1.5">
+              <Button variant="default" size="sm" className="h-8 px-3 text-xs">
+                <LogIn className="h-4 w-4" />
+                <span className="ml-1">Login</span>
+              </Button>
+            </Link>
+          )}
         </nav>
       </div>
     </header>
